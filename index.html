@@ -38,7 +38,7 @@
         var snitches = [];
         if (radius >= 0 && radius <= 3600) { // prevent endless loop if radius = NaN, or hanging script is radius is too big
             for (var currentX = -radius, currentZ = 0, nextX = 0, nextZ = 0, mode = 0; nextZ >= 0;) {
-                snitches.push({'x': currentX, 'y': currentZ});
+                snitches.push({'x': currentX, 'z': currentZ});
 
                 // for the nextPoint,
                 // try to move (snitchDistance blocks) along the x-axis (mode 2 is moving right), 
