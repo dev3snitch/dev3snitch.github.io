@@ -37,38 +37,38 @@
     function getSnitches(radius, snitchDistance) {
         var snitches = [];
         if (radius >= 0 && radius <= 3600) { // prevent endless loop if radius = NaN, or hanging script is radius is too big
-            for (var currentX = -radius, currentY = 0, nextX = 0, nextY = 0, mode = 0; nextY >= 0;) {
-                snitches.push({'x': currentX, 'y': currentY});
+            for (var currentX = -radius, currentZ = 0, nextX = 0, nextZ = 0, mode = 0; nextZ >= 0;) {
+                snitches.push({'x': currentX, 'y': currentZ});
 
                 // for the nextPoint,
                 // try to move (snitchDistance blocks) along the x-axis (mode 2 is moving right), 
-                // if that that moves too fast (over +/- snitchDistance blocks on the y-axis or over the edge of the circle),
-                // move (snitchDistance blocks) along the y-axis instead (mode 1 is upwards, mode 3 is downwards),
-                // if that moves y < 0, we're out
+                // if that that moves too fast (over +/- snitchDistance blocks on the z-axis or over the edge of the circle),
+                // move (snitchDistance blocks) along the z-axis instead (mode 1 is upwards, mode 3 is downwards),
+                // if that moves z < 0, we're out
 
                 nextX = currentX + snitchDistance;
                 if (nextX <= radius) { // mode = 1 || mode = 2
-                    nextY = Math.floor(Math.sqrt(radius*radius - nextX*nextX));
+                    nextZ = Math.floor(Math.sqrt(radius*radius - nextX*nextX));
                 } else { // mode = 3
                     mode = 3;
                 }
-                if (currentY - nextY > snitchDistance || nextY - currentY > snitchDistance || mode == 3) { // mode = 1 || mode = 3
-                    // when on or after the top of the circle, currentY needs to be decreased
-                    nextY = currentY + snitchDistance; // mode = 1
-                    if (nextY > radius || currentX > 0) { // mode = 3
-                        nextY = currentY - snitchDistance;
-                        nextX = Math.floor(Math.sqrt(radius*radius - nextY*nextY));
+                if (currentZ - nextZ > snitchDistance || nextZ - currentZ > snitchDistance || mode == 3) { // mode = 1 || mode = 3
+                    // when on or after the top of the circle, currentZ needs to be decreased
+                    nextZ = currentZ + snitchDistance; // mode = 1
+                    if (nextZ > radius || currentX > 0) { // mode = 3
+                        nextZ = currentZ - snitchDistance;
+                        nextX = Math.floor(Math.sqrt(radius*radius - nextZ*nextZ));
                     } else { // mode = 1
-                        nextX = -Math.floor(Math.sqrt(radius*radius - nextY*nextY));
+                        nextX = -Math.floor(Math.sqrt(radius*radius - nextZ*nextZ));
                     }
                 }
                 currentX = nextX;
-                currentY = nextY;
+                currentZ = nextZ;
             }
         }
         for (var len = snitches.length - 1; len > 0; len--) {
-            if (snitches[len].y != 0) {
-                snitches.push({'x': snitches[len].x, 'y': -snitches[len].y});
+            if (snitches[len].z != 0) {
+                snitches.push({'x': snitches[len].x, 'z': -snitches[len].z});
             }
         }
         return snitches;
@@ -77,7 +77,7 @@
     function update() {
 
         let centerX         = parseInt(xInput.value);
-        let centerY         = parseInt(yInput.value);
+        let centerZ         = parseInt(zInput.value);
         let radius          = parseInt(rInput.value);
         let snitchDistance  = 23;
         var snitches        = getSnitches(radius, snitchDistance);
@@ -85,13 +85,13 @@
         if (!(centerX > 0 || centerX < 0)) {
             centerX = 0;
         }
-        if (!(centerY > 0 || centerY < 0)) {
-            centerY = 0;
+        if (!(centerZ > 0 || centerZ < 0)) {
+            centerZ = 0;
         }
         // refresh the output box
         output.innerHTML = '';
         for (var i = 0, len = snitches.length; i < len; i++) {
-            output.innerHTML += '<label for="snitch' + i + '" class="snitchEntry"><input type="checkbox" id="snitch' + i + '">' + (snitches[i].x + centerX) + ', ' + (snitches[i].y + centerY) + '</label>';
+            output.innerHTML += '<label for="snitch' + i + '" class="snitchEntry"><input type="checkbox" id="snitch' + i + '">' + (snitches[i].x + centerX) + ', ' + (snitches[i].z + centerZ) + '</label>';
         }
     }
 
@@ -111,16 +111,16 @@
     xInput.setAttribute("value", 0);
     frame.appendChild(xInput);
 
-    var yLabel = document.createElement('label');
-    yLabel.setAttribute("for", "y");
-    yLabel.innerText = 'y: ';
-    frame.appendChild(yLabel);
+    var zLabel = document.createElement('label');
+    zLabel.setAttribute("for", "z");
+    zLabel.innerText = 'z: ';
+    frame.appendChild(zLabel);
 
-    var yInput = document.createElement('input');
-    yInput.setAttribute("type", "text");
-    yInput.setAttribute("id", "y");
-    yInput.setAttribute("value", 0);
-    frame.appendChild(yInput);
+    var zInput = document.createElement('input');
+    zInput.setAttribute("type", "text");
+    zInput.setAttribute("id", "z");
+    zInput.setAttribute("value", 0);
+    frame.appendChild(zInput);
 
     var rLabel = document.createElement('label');
     rLabel.setAttribute("for", "r");
@@ -146,7 +146,7 @@
         update();
     });
 
-    yInput.addEventListener('input', function(e){
+    zInput.addEventListener('input', function(e){
         update();
     });
 
