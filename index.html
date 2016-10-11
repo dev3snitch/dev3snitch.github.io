@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Devoted 3 Snitch Layouter</title>
+    <style type="text/css">
+    .snitchEntry {
+        float:left;
+        width:120px;
+        height: 30px;
+        border:1px solid black;
+        text-align: center;
+    }
+    label {
+        margin: 5px;
+        height: 30px;
+        line-height: 30px;
+    }
+    input {
+        margin: 5px 5px 20px 0px;
+    }
+    span {
+        float: left;
+        width: 100%;
+        text-align: center;
+        margin: 50px 0px 0px 0px;
+    }
+    </style>
+</head>
+<body>
+<span>Insert your data to get the perfect positions for your snitch-radius!</span>
+</body>
+<script type="text/javascript">
+    
+    // functions
+    
+    function getSnitches(radius, snitchDistance) {
+        var snitches = [];
+        if (radius >= 0 && radius <= 3600) { // prevent endless loop if radius = NaN, or hanging script is radius is too big
+            for (var currentX = -radius, currentY = 0, nextX = 0, nextY = 0, mode = 0; nextY >= 0;) {
+                snitches.push({'x': currentX, 'y': currentY});
+
+                // for the nextPoint,
+                // try to move (snitchDistance blocks) along the x-axis (mode 2 is moving right), 
+                // if that that moves too fast (over +/- snitchDistance blocks on the y-axis or over the edge of the circle),
+                // move (snitchDistance blocks) along the y-axis instead (mode 1 is upwards, mode 3 is downwards),
+                // if that moves y < 0, we're out
+
+                nextX = currentX + snitchDistance;
+                if (nextX <= radius) { // mode = 1 || mode = 2
+                    nextY = Math.floor(Math.sqrt(radius*radius - nextX*nextX));
+                } else { // mode = 3
+                    mode = 3;
+                }
+                if (currentY - nextY > snitchDistance || nextY - currentY > snitchDistance || mode == 3) { // mode = 1 || mode = 3
+                    // when on or after the top of the circle, currentY needs to be decreased
+                    nextY = currentY + snitchDistance; // mode = 1
+                    if (nextY > radius || currentX > 0) { // mode = 3
+                        nextY = currentY - snitchDistance;
+                        nextX = Math.floor(Math.sqrt(radius*radius - nextY*nextY));
+                    } else { // mode = 1
+                        nextX = -Math.floor(Math.sqrt(radius*radius - nextY*nextY));
+                    }
+                }
+                currentX = nextX;
+                currentY = nextY;
+            }
+        }
+        for (var len = snitches.length - 1; len > 0; len--) {
+            if (snitches[len].y != 0) {
+                snitches.push({'x': snitches[len].x, 'y': -snitches[len].y});
+            }
+        }
+        return snitches;
+    }
+
+    function update() {
+
+        let centerX         = parseInt(xInput.value);
+        let centerY         = parseInt(yInput.value);
+        let radius          = parseInt(rInput.value);
+        let snitchDistance  = 23;
+        var snitches        = getSnitches(radius, snitchDistance);
+
+        if (!(centerX > 0 || centerX < 0)) {
+            centerX = 0;
+        }
+        if (!(centerY > 0 || centerY < 0)) {
+            centerY = 0;
+        }
+        // refresh the output box
+        output.innerHTML = '';
+        for (var i = 0, len = snitches.length; i < len; i++) {
+            output.innerHTML += '<label for="snitch' + i + '" class="snitchEntry"><input type="checkbox" id="snitch' + i + '">' + (snitches[i].x + centerX) + ', ' + (snitches[i].y + centerY) + '</label>';
+        }
+    }
+
+    // objects
+
+    var frame  = document.createElement('div');
+    document.querySelector('body').appendChild(frame);
+    
+    var xLabel = document.createElement('label');
+    xLabel.setAttribute("for", "x");
+    xLabel.innerText = 'x: ';
+    frame.appendChild(xLabel);
+
+    var xInput = document.createElement('input');
+    xInput.setAttribute("type", "text");
+    xInput.setAttribute("id", "x");
+    xInput.setAttribute("value", 0);
+    frame.appendChild(xInput);
+
+    var yLabel = document.createElement('label');
+    yLabel.setAttribute("for", "y");
+    yLabel.innerText = 'y: ';
+    frame.appendChild(yLabel);
+
+    var yInput = document.createElement('input');
+    yInput.setAttribute("type", "text");
+    yInput.setAttribute("id", "y");
+    yInput.setAttribute("value", 0);
+    frame.appendChild(yInput);
+
+    var rLabel = document.createElement('label');
+    rLabel.setAttribute("for", "r");
+    rLabel.innerText = 'r: ';
+    frame.appendChild(rLabel);
+
+    var rInput = document.createElement('input');
+    rInput.setAttribute("type", "text");
+    rInput.setAttribute("id", "r");
+    rInput.setAttribute("value", 100);
+    frame.appendChild(rInput);
+
+    var output = document.createElement('div');
+    frame.appendChild(output);
+    
+    // styles
+
+    frame.style = 'text-align: center; padding: 50px;';
+
+    // events
+
+    xInput.addEventListener('input', function(e){
+        update();
+    });
+
+    yInput.addEventListener('input', function(e){
+        update();
+    });
+
+    rInput.addEventListener('input', function(e){
+        update();
+    });
+
+    // init
+
+    update();
+
+</script>
+</html>
